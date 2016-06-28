@@ -102,6 +102,13 @@ class PDF2XHTML extends PDFTextStripper {
      * Format used for signature dates
      * TODO Make this thread-safe
      */
+	 
+	 /**
+	  * Variable permettant de compter les pages 
+	  */	 
+	private static int nbPage=0;
+	private static final String NB_PAGE_ATTRIBUTE_NAME="numeroPage";
+	
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ROOT);
     private final ContentHandler originalHandler;
     private final ParseContext context;
@@ -256,7 +263,10 @@ class PDF2XHTML extends PDFTextStripper {
     @Override
     protected void startPage(PDPage page) throws IOException {
         try {
-            handler.startElement("div", "class", "page");
+			AttributesImpl attributes=new AttributesImpl();
+			attributes.addAttribute("", "class", "class", "CDATA", "page");
+			attributes.addAttribute("", NB_PAGE_ATTRIBUTE_NAME, NB_PAGE_ATTRIBUTE_NAME, "CDATA", String.valueOf(++nbPage));
+            handler.startElement("div",attributes);
         } catch (SAXException e) {
             throw new IOExceptionWithCause("Unable to start a page", e);
         }
@@ -476,7 +486,7 @@ class PDF2XHTML extends PDFTextStripper {
     protected void writeParagraphStart() throws IOException {
         super.writeParagraphStart();
         try {
-            handler.startElement("p");
+            handler.startElement("p", NB_PAGE_ATTRIBUTE_NAME, String.valueOf(nbPage));
         } catch (SAXException e) {
             throw new IOExceptionWithCause("Unable to start a paragraph", e);
         }
